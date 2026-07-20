@@ -540,58 +540,115 @@
   }, { threshold:0.15 });
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  // ---------- Ambient audio control ----------
-  // Change your audio file path inside the quotes below:
-  const audio = new Audio('bg-music.mp3'); 
+  // ---------- Ambient audio DEBUG ----------
+  const audio = new Audio("bg-music.mp3");
   audio.loop = true;
-  let isPlaying = true; 
+  audio.preload = "auto";
 
-  // Safely find the button element first
-  const musicBtn = document.getElementById('musicBtn');
+  const musicBtn = document.getElementById("musicBtn");
 
-  // Helper function to play audio handles browser restrictions safely
-  function playAudio() {
-    audio.play().then(() => {
-      isPlaying = true;
-      if (musicBtn) {
-        musicBtn.classList.add('playing');
-        musicBtn.setAttribute('aria-pressed', 'true');
-      }
-    }).catch(err => {
-      console.log("Playback blocked by browser settings. Music will start on user interaction.");
-    });
+  let isPlaying = false;
+
+  console.log("Audio src:", audio.src);
+
+  audio.addEventListener("canplay", () => {
+      console.log("✅ canplay");
+  });
+
+  audio.addEventListener("playing", () => {
+      console.log("▶️ playing");
+  });
+
+  audio.addEventListener("pause", () => {
+      console.log("⏸ paused");
+  });
+
+  audio.addEventListener("ended", () => {
+      console.log("🔚 ended");
+  });
+
+  audio.addEventListener("error", () => {
+      console.log("❌ Audio error");
+      console.log(audio.error);
+  });
+
+  function updateButton() {
+      musicBtn.classList.toggle("playing", isPlaying);
+      musicBtn.setAttribute("aria-pressed", isPlaying);
   }
 
-  // Try to play immediately 
-  playAudio();
+  async function playAudio(reason = "") {
 
-  // Fallback for browsers: triggers audio on the guest's first screen tap/click anywhere
-  const startOnInteraction = () => {
-    if (audio.paused && isPlaying) {
-      playAudio();
-    }
-    document.removeEventListener('click', startOnInteraction);
-    document.removeEventListener('touchstart', startOnInteraction);
-  };
-  document.addEventListener('click', startOnInteraction);
-  document.addEventListener('touchstart', startOnInteraction);
+      console.log("----------------------");
+      console.log("playAudio()", reason);
+      console.log("paused:", audio.paused);
+      console.log("readyState:", audio.readyState);
+      console.log("networkState:", audio.networkState);
+      console.log("src:", audio.currentSrc);
 
-  // Music button toggle logic
-  if (musicBtn) {
-    musicBtn.addEventListener('click', (e)=>{
-      e.stopPropagation(); // Stops interaction listeners from refiring
-      if(isPlaying){
-        audio.pause();
-        isPlaying = false;
-        musicBtn.classList.remove('playing');
-        musicBtn.setAttribute('aria-pressed', 'false');
-        musicBtn.setAttribute('aria-label', 'Play background music');
+      try {
+          await audio.play();
+
+          console.log("✅ play() resolved");
+
+          isPlaying = true;
+          updateButton();
+
+      } catch (err) {
+
+          console.error("❌ play() rejected");
+          console.error(err);
+
+      }
+  }
+
+  function pauseAudio() {
+      console.log("pauseAudio()");
+      audio.pause();
+      isPlaying = false;
+      updateButton();
+  }
+
+  // try autoplay
+  playAudio("initial load");
+
+  // start on first interaction
+  [
+      "click",
+      "touchstart",
+      "pointerdown",
+      "scroll",
+      "wheel",
+      "keydown"
+  ].forEach(event => {
+
+      window.addEventListener(event, function firstInteraction() {
+
+          console.log("User interaction:", event);
+
+          playAudio(event);
+
+      }, {
+          once: true,
+          capture: true,
+          passive: true
+      });
+
+  });
+
+  musicBtn.addEventListener("click", e => {
+
+      console.log("Music button clicked");
+
+      e.stopPropagation();
+
+      if (audio.paused) {
+          playAudio("button");
       } else {
-        playAudio();
-        musicBtn.setAttribute('aria-label', 'Pause background music');
+          pauseAudio();
       }
-    });
-  }
+
+  });
 </script>
 </body>
 </html>
