@@ -112,16 +112,37 @@
     margin-top:2px;
   }
   .names{
-    display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:center;
-    font-size:clamp(2.6rem, 8vw, 5.4rem);
+    display:flex; flex-direction:column; align-items:center; gap:16px; justify-content:center;
     line-height:1;
     margin-top:6px;
+  }
+  .name-group{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .big-name{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    color:var(--kumkum-deep);
+    font-size:clamp(2.6rem, 8vw, 5.4rem);
   }
   .names .amp{
     font-style:italic;
     color:var(--gold);
-    font-size:0.6em;
+    font-size:clamp(1.6rem, 4.8vw, 3.2rem);
     font-weight:500;
+    align-self:center;
+    margin:4px 0;
+  }
+  .names .ps-label{
+    font-size:0.68rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:500;
+    white-space:nowrap;
+  }
+  @media (max-width:480px){
+    .names .ps-label{ white-space:normal; text-align:center; letter-spacing:0.08em; }
   }
   .hero-date{
     margin-top:8px;
@@ -132,6 +153,14 @@
     color:var(--ink-soft);
   }
   .hero-date strong{ color:var(--kumkum); font-weight:600; letter-spacing:0.24em; }
+
+  .family-line{
+    margin-top:14px;
+    font-size:1.02rem;
+    color:var(--ink-soft);
+    font-style:italic;
+    font-family:'Cormorant Garamond', serif;
+  }
 
   /* countdown */
   .countdown{
@@ -340,16 +369,22 @@
     </svg>
   </div>
 
-  <span class="eyebrow">A Tamil Wedding Celebration</span>
+  <span class="eyebrow">A Wedding Celebration</span>
   <span class="tamil-line tamil">சுப மங்கள கல்யாணம்</span>
 
   <div class="names">
-    <span>Rajeshwar</span>
+    <div class="name-group">
+      <span class="big-name">Rajeshwar</span>
+      <span class="ps-label">S/O Duraisamy &amp; Ranjitham</span>
+    </div>    
     <span class="amp">&amp;</span>
-    <span>Viveatha</span>
+    <div class="name-group">
+      <span class="big-name">Viveatha</span>
+      <span class="ps-label">D/O Bose &amp; Manjula</span>
+    </div>
   </div>
 
-  <div class="hero-date">Muhurtham <strong>· 17 September 2026 ·</strong> 7:35 – 9:00 AM</div>
+  <div class="family-line">Together with their families, request the pleasure of your company</div>
 
   <div class="countdown" id="countdown" aria-live="polite">
     <div class="cd-box"><div class="cd-num" id="cd-days">00</div><div class="cd-label">Days</div></div>
@@ -446,10 +481,9 @@
 <footer>
   <span class="tamil">நன்றி</span>
   <div class="thanks">Thank you for being a part of our story</div>
-  <div class="credit">Music: an original ambient piece, generated for this invitation</div>
 </footer>
 
-<button class="music-btn" id="musicBtn" aria-pressed="false" aria-label="Play background music">
+<button class="music-btn playing" id="musicBtn" aria-pressed="true" aria-label="Pause background music">
   <span class="bars"><span></span><span></span><span></span></span>
 </button>
 
@@ -506,60 +540,58 @@
   }, { threshold:0.15 });
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  // ---------- Ambient music (synthesized, original — no licensing needed) ----------
-  // Swap this out for your own licensed mp3 by replacing this block with:
-  //   const audio = new Audio('your-file.mp3'); audio.loop = true; audio.play();
-  let audioCtx, isPlaying = false, nodes = [];
+  // ---------- Ambient audio control ----------
+  // Change your audio file path inside the quotes below:
+  const audio = new Audio('bg-music.mp3'); 
+  audio.loop = true;
+  let isPlaying = true; 
 
-  function startAmbient(){
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const master = audioCtx.createGain();
-    master.gain.value = 0.0;
-    master.connect(audioCtx.destination);
-    master.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 2);
-
-    // gentle drone with slow vibrato, veena-ish pluck-decay layer
-    const freqs = [220, 277.18, 329.63]; // A3, C#4, E4 - warm triad
-    freqs.forEach((f, i)=>{
-      const osc = audioCtx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = f;
-      const gain = audioCtx.createGain();
-      gain.gain.value = 0.5/(i+1.4);
-      const lfo = audioCtx.createOscillator();
-      lfo.frequency.value = 0.15 + i*0.05;
-      const lfoGain = audioCtx.createGain();
-      lfoGain.gain.value = 3;
-      lfo.connect(lfoGain);
-      lfoGain.connect(osc.frequency);
-      osc.connect(gain);
-      gain.connect(master);
-      osc.start();
-      lfo.start();
-      nodes.push(osc, lfo, gain, lfoGain);
-    });
-    nodes.push(master);
-  }
-
-  function stopAmbient(){
-    if(!audioCtx) return;
-    const master = nodes[nodes.length-1];
-    master.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
-    setTimeout(()=>{
-      nodes.forEach(n=>{ if(n.stop) try{n.stop();}catch(e){} });
-      if(audioCtx) audioCtx.close();
-      nodes = [];
-    }, 1100);
-  }
-
+  // Safely find the button element first
   const musicBtn = document.getElementById('musicBtn');
-  musicBtn.addEventListener('click', ()=>{
-    isPlaying = !isPlaying;
-    musicBtn.classList.toggle('playing', isPlaying);
-    musicBtn.setAttribute('aria-pressed', String(isPlaying));
-    musicBtn.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
-    if(isPlaying){ startAmbient(); } else { stopAmbient(); }
-  });
+
+  // Helper function to play audio handles browser restrictions safely
+  function playAudio() {
+    audio.play().then(() => {
+      isPlaying = true;
+      if (musicBtn) {
+        musicBtn.classList.add('playing');
+        musicBtn.setAttribute('aria-pressed', 'true');
+      }
+    }).catch(err => {
+      console.log("Playback blocked by browser settings. Music will start on user interaction.");
+    });
+  }
+
+  // Try to play immediately 
+  playAudio();
+
+  // Fallback for browsers: triggers audio on the guest's first screen tap/click anywhere
+  const startOnInteraction = () => {
+    if (audio.paused && isPlaying) {
+      playAudio();
+    }
+    document.removeEventListener('click', startOnInteraction);
+    document.removeEventListener('touchstart', startOnInteraction);
+  };
+  document.addEventListener('click', startOnInteraction);
+  document.addEventListener('touchstart', startOnInteraction);
+
+  // Music button toggle logic
+  if (musicBtn) {
+    musicBtn.addEventListener('click', (e)=>{
+      e.stopPropagation(); // Stops interaction listeners from refiring
+      if(isPlaying){
+        audio.pause();
+        isPlaying = false;
+        musicBtn.classList.remove('playing');
+        musicBtn.setAttribute('aria-pressed', 'false');
+        musicBtn.setAttribute('aria-label', 'Play background music');
+      } else {
+        playAudio();
+        musicBtn.setAttribute('aria-label', 'Pause background music');
+      }
+    });
+  }
 </script>
 </body>
 </html>
