@@ -97,12 +97,12 @@
   }
 
   /* ---------- GLOBAL DRIFTING FLOWERS & HEARTS STYLES ---------- */
-  .global-flower-container {
+  .global-heart-container {
     position: fixed;
     inset: 0;
     pointer-events: none;
     overflow: hidden;
-    z-index: 2; /* Floats naturally over everything without blocking clicks */
+    z-index: 2;
   }
 
   .falling-item {
@@ -116,7 +116,7 @@
   .falling-item svg {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0px 2px 5px rgba(224, 122, 42, 0.25));
+    filter: drop-shadow(0px 2px 5px rgba(224, 90, 16, 0.3));
   }
 
   @keyframes floatDown {
@@ -126,15 +126,15 @@
       transform: translateX(0) rotate(0deg);
     }
     15% {
-      opacity: 0.85;
+      opacity: 0.9;
     }
     85% {
-      opacity: 0.85;
+      opacity: 0.9;
     }
     100% {
       top: 105vh;
       opacity: 0;
-      transform: translateX(40px) rotate(270deg);
+      transform: translateX(35px) rotate(220deg);
     }
   }
 
@@ -419,7 +419,7 @@
 <div class="bg-texture"></div>
 
 <!-- Full Screen Continuous Flowers & Hearts Container -->
-<div class="global-flower-container" id="globalFlowerContainer" aria-hidden="true"></div>
+<div class="global-heart-container" id="globalHeartContainer" aria-hidden="true"></div>
 
 <!-- ============ HERO ============ -->
 <section class="hero">
@@ -556,7 +556,7 @@
       <span class="eyebrow">Venue</span>
       <h3>Sri Kandhan Mahal A/C</h3>
       <p>Both the reception and the muhurtham will be held at Sri Kandhan Mahal A/C. We'd love for you to join us — tap below for turn‑by‑turn directions.</p>
-      <div class="venue-address">Sri Kandhan Mahal A/C<br>Dharapuram Road, Jawahar Nagar,<br>Palani, Tamil Nadu, India<br>560103</div>
+      <div class="venue-address"><em>Sri Kandhan Mahal A/C,<br>New Dharapuram Rd, Jawahar Nagar<br>Palani, Tamil Nadu, India</em></div>
       <a class="directions-btn" href="https://maps.app.goo.gl/JDJPLFBFfiTw9nxD6" target="_blank" rel="noopener">Get Directions →</a>
     </div>
     <div class="map-frame reveal">
@@ -598,23 +598,24 @@
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // ---------- Realistic Flower & Small Heart SVG Generators ----------
-  function generateFlowerSVG() {
+  // ---------- Vibrant 5-Petal Flower & Small Heart SVG Generators ----------
+  function generate5PetalFlowerSVG() {
     return `<svg viewBox="0 0 100 100">
       <defs>
-        <radialGradient id="flowerGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#FFD166" />
-          <stop offset="30%" stop-color="#FF9F1C" />
-          <stop offset="85%" stop-color="#E05A10" />
-        </radialGradient>
+        <linearGradient id="flowerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FF758C" />
+          <stop offset="100%" stop-color="#E05A10" />
+        </linearGradient>
       </defs>
-      <g fill="url(#flowerGrad)" stroke="#B84A00" stroke-width="0.8">
-        <path d="M50,50 Q42,20 50,10 Q58,20 50,50" />
-        <path d="M50,50 Q75,32 88,42 Q75,60 50,50" />
-        <path d="M50,50 Q68,78 72,90 Q50,80 50,50" />
-        <path d="M50,50 Q32,80 28,90 Q32,78 50,50" />
-        <path d="M50,50 Q25,60 12,42 Q25,32 50,50" />
-        <circle cx="50" cy="50" r="5" fill="#7C2436" stroke="#FFD166" stroke-width="1" />
+      <g stroke="#B84A00" stroke-width="1" fill="url(#flowerGrad)" opacity="0.88">
+        <g id="singlePetal">
+          <path d="M50,15 C58,28 58,42 50,50 C42,42 42,28 50,15 Z" />
+        </g>
+        <use href="#singlePetal" transform="rotate(72 50 50)" />
+        <use href="#singlePetal" transform="rotate(144 50 50)" />
+        <use href="#singlePetal" transform="rotate(216 50 50)" />
+        <use href="#singlePetal" transform="rotate(288 50 50)" />
+        <circle cx="50" cy="50" r="4.5" fill="#FFD166" stroke="#B84A00" stroke-width="0.8" />
       </g>
     </svg>`;
   }
@@ -633,23 +634,22 @@
   }
 
   function initGlobalDrift() {
-    const container = document.getElementById('globalFlowerContainer');
+    const container = document.getElementById('globalHeartContainer');
     if(!container) return;
 
-    const totalCount = 22; // Balanced density of flowers + hearts
+    const totalCount = 20;
 
     for (let i = 0; i < totalCount; i++) {
       const item = document.createElement('div');
       item.className = 'falling-item';
       
-      // Mix flowers (~60%) and small hearts (~40%)
-      const isHeart = Math.random() < 0.4;
-      item.innerHTML = isHeart ? generateHeartSVG() : generateFlowerSVG();
+      const isHeart = Math.random() < 0.45;
+      item.innerHTML = isHeart ? generateHeartSVG() : generate5PetalFlowerSVG();
 
-      // Hearts are slightly smaller for a delicate aesthetic
-      const size = isHeart ? (Math.random() * 8 + 12) : (Math.random() * 14 + 18); 
+      // Delicate sizing (12px to 22px)
+      const size = isHeart ? (Math.random() * 6 + 10) : (Math.random() * 8 + 15); 
       const left = Math.random() * 95; 
-      const duration = Math.random() * 6 + 9; // 9s to 15s smooth float
+      const duration = Math.random() * 6 + 9; // 9s to 15s gentle float
       const delay = Math.random() * 12; 
 
       item.style.width = `${size}px`;
