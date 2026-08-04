@@ -90,19 +90,14 @@
   .kolam-divider{ width:100%; display:flex; justify-content:center; padding:8px 0 0; opacity:0.85; position:relative; }
   .kolam-divider svg{ width:180px; height:36px; }
 
-  @media (prefers-reduced-motion: reduce){
-    .kolam-path{ animation:none; stroke-dashoffset:0; }
-    .kolam-dot{ animation:none; opacity:1; }
-    html{ scroll-behavior:auto; }
-  }
-
   /* ---------- GLOBAL DRIFTING FLOWERS & HEARTS STYLES ---------- */
   .global-heart-container {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none;
     overflow: hidden;
     z-index: 2;
+    -webkit-transform: translate3d(0,0,0);
   }
 
   .falling-item {
@@ -110,20 +105,24 @@
     top: -50px;
     opacity: 0;
     animation: floatDown linear infinite;
-    will-change: transform, opacity;
+    -webkit-animation: floatDown linear infinite;
+    will-change: transform, top, opacity;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   .falling-item svg {
     width: 100%;
     height: 100%;
+    display: block;
     filter: drop-shadow(0px 2px 5px rgba(224, 90, 16, 0.3));
   }
 
   @keyframes floatDown {
     0% {
-      top: -10vh;
+      top: -10%;
       opacity: 0;
-      transform: translateX(0) rotate(0deg);
+      transform: translate3d(0,0,0) rotate(0deg);
     }
     15% {
       opacity: 0.9;
@@ -132,9 +131,28 @@
       opacity: 0.9;
     }
     100% {
-      top: 105vh;
+      top: 110%;
       opacity: 0;
-      transform: translateX(35px) rotate(220deg);
+      transform: translate3d(35px,0,0) rotate(220deg);
+    }
+  }
+
+  @-webkit-keyframes floatDown {
+    0% {
+      top: -10%;
+      opacity: 0;
+      -webkit-transform: translate3d(0,0,0) rotate(0deg);
+    }
+    15% {
+      opacity: 0.9;
+    }
+    85% {
+      opacity: 0.9;
+    }
+    100% {
+      top: 110%;
+      opacity: 0;
+      -webkit-transform: translate3d(35px,0,0) rotate(220deg);
     }
   }
 
@@ -378,6 +396,16 @@
     padding:70px 0 46px;
     text-align:center;
   }
+  footer .personal-note {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    max-width: 580px;
+    margin: 0 auto 28px;
+    line-height: 1.6;
+    padding: 0 20px;
+  }
   footer .tamil{ font-size:1.3rem; color:var(--kumkum); display:block; margin-bottom:8px; }
   footer .thanks{ color:var(--ink-soft); font-size:0.95rem; }
   footer .credit{ margin-top:28px; font-size:0.68rem; letter-spacing:0.15em; text-transform:uppercase; color:#a99a86; }
@@ -409,10 +437,6 @@
     transition:opacity 0.7s ease, transform 0.7s ease;
   }
   .reveal.in{ opacity:1; transform:translateY(0); }
-  @media (prefers-reduced-motion: reduce){
-    .reveal{ opacity:1; transform:none; transition:none; }
-    .falling-item { display: none !important; }
-  }
 </style>
 </head>
 <body>
@@ -556,7 +580,7 @@
       <span class="eyebrow">Venue</span>
       <h3>Sri Kandhan Mahal A/C</h3>
       <p>Both the reception and the muhurtham will be held at Sri Kandhan Mahal A/C. We'd love for you to join us — tap below for turn‑by‑turn directions.</p>
-      <div class="venue-address"><em>Sri Kandhan Mahal A/C,<br>New Dharapuram Rd, Jawahar Nagar<br>Palani, Tamil Nadu, India</em></div>
+      <div class="venue-address"><em>New Dharapuram Rd, Jawahar Nagar<br/>Palani, Tamil Nadu, India - 624601</em></div>
       <a class="directions-btn" href="https://maps.app.goo.gl/JDJPLFBFfiTw9nxD6" target="_blank" rel="noopener">Get Directions →</a>
     </div>
     <div class="map-frame reveal">
@@ -569,7 +593,7 @@
   </div>
 </section>
 
-<footer>
+<footer><p class="personal-note">Please treat this as our personal invitation and grace the occasion with your presence and blessings.</p>
   <span class="tamil">நன்றி</span>
   <div class="thanks">Thank you for being a part of our story</div>
 </footer>
@@ -598,38 +622,38 @@
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // ---------- Vibrant 5-Petal Flower & Small Heart SVG Generators ----------
-  function generate5PetalFlowerSVG() {
-    return `<svg viewBox="0 0 100 100">
+  // ---------- UNIQUE SVG ID GENERATORS FOR iPHONE COMPATIBILITY ----------
+  function generate5PetalFlowerSVG(uniqueId) {
+    return `<svg viewBox="0 0 100 100" style="display:block;">
       <defs>
-        <linearGradient id="flowerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="flowerGrad_${uniqueId}" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#FF758C" />
           <stop offset="100%" stop-color="#E05A10" />
         </linearGradient>
       </defs>
-      <g stroke="#B84A00" stroke-width="1" fill="url(#flowerGrad)" opacity="0.88">
-        <g id="singlePetal">
+      <g stroke="#B84A00" stroke-width="1" fill="url(#flowerGrad_${uniqueId})" opacity="0.88">
+        <g id="singlePetal_${uniqueId}">
           <path d="M50,15 C58,28 58,42 50,50 C42,42 42,28 50,15 Z" />
         </g>
-        <use href="#singlePetal" transform="rotate(72 50 50)" />
-        <use href="#singlePetal" transform="rotate(144 50 50)" />
-        <use href="#singlePetal" transform="rotate(216 50 50)" />
-        <use href="#singlePetal" transform="rotate(288 50 50)" />
+        <use href="#singlePetal_${uniqueId}" transform="rotate(72 50 50)" />
+        <use href="#singlePetal_${uniqueId}" transform="rotate(144 50 50)" />
+        <use href="#singlePetal_${uniqueId}" transform="rotate(216 50 50)" />
+        <use href="#singlePetal_${uniqueId}" transform="rotate(288 50 50)" />
         <circle cx="50" cy="50" r="4.5" fill="#FFD166" stroke="#B84A00" stroke-width="0.8" />
       </g>
     </svg>`;
   }
 
-  function generateHeartSVG() {
-    return `<svg viewBox="0 0 100 100">
+  function generateHeartSVG(uniqueId) {
+    return `<svg viewBox="0 0 100 100" style="display:block;">
       <defs>
-        <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="heartGrad_${uniqueId}" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#FF758C" />
           <stop offset="100%" stop-color="#E05A10" />
         </linearGradient>
       </defs>
       <path d="M50,85 C20,60 5,40 18,22 C30,8 45,18 50,28 C55,18 70,8 82,22 C95,40 80,60 50,85 Z" 
-            fill="url(#heartGrad)" stroke="#B84A00" stroke-width="1" opacity="0.85" />
+            fill="url(#heartGrad_${uniqueId})" stroke="#B84A00" stroke-width="1" opacity="0.85" />
     </svg>`;
   }
 
@@ -643,8 +667,9 @@
       const item = document.createElement('div');
       item.className = 'falling-item';
       
+      const uniqueId = `svg_id_${Math.random().toString(36).substr(2, 9)}_${i}`;
       const isHeart = Math.random() < 0.45;
-      item.innerHTML = isHeart ? generateHeartSVG() : generate5PetalFlowerSVG();
+      item.innerHTML = isHeart ? generateHeartSVG(uniqueId) : generate5PetalFlowerSVG(uniqueId);
 
       // Delicate sizing (12px to 22px)
       const size = isHeart ? (Math.random() * 6 + 10) : (Math.random() * 8 + 15); 
